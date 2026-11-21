@@ -6,7 +6,8 @@
   "scripts": {
     "test": "tsx --test tests/*.prueba.ts",
     "agente": "tsx src/cli.ts",
-    "servidor": "tsx src/servidor.ts"
+    "servidor": "tsx src/servidor.ts",
+    "demo": "tsx src/demo.ts"
   },
   "keywords": [],
   "author": "",

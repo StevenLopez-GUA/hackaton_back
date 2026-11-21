@@ -9,6 +9,12 @@ import { q as gtq, pct, puntos, local } from "./formato.js";
 /** Comparación contra el WACC hecha por código (los modelos pequeños se equivocan al comparar). */
 export const vsWacc = (roic: number | null, wacc = 0.11) =>
   roic === null ? "sin dato" : roic >= wacc ? `POR ENCIMA del WACC (${pct(wacc)}): crea valor` : `POR DEBAJO del WACC (${pct(wacc)}): destruye valor`;
+/** Antes/después de corregir contra el WACC, ya redactado por código. */
+export const conclusionWacc = (antes: number, despues: number, wacc = 0.11) =>
+  despues >= wacc
+    ? (antes >= wacc ? "Antes y después de corregir queda POR ENCIMA del WACC: crea valor." : "Al corregir pasa a estar POR ENCIMA del WACC: pasa a crear valor.")
+    : (antes >= wacc ? "Al corregir cae POR DEBAJO del WACC: el error escondía que destruye valor."
+      : "Antes y después de corregir queda POR DEBAJO del WACC: sigue destruyendo valor (aunque la brecha cambia).");
 export const fmt = (m: Metrica, x: number | null) => (x === null ? "sin dato" : PORCENTAJES.includes(m) ? pct(x) : gtq(x));
 
 export function valor(ind: Indicadores | null | undefined, m: Metrica): number | null {
@@ -160,18 +166,22 @@ export async function impactoPorAlerta(version: Version = "real_2025", alertaId?
   const sel = alertaId ? items.filter((i) => i.alertaId === alertaId) : items;
   return { version, tipoDato: "calculado", nota: "Cada alerta se mide por separado; los efectos pueden compensarse, así que no se suman.",
     items: sel.map((i) => ({ alertaId: i.alertaId, regla: i.regla, tipo: i.tipo, supuestoCorreccion: i.supuestoCorreccion,
-      ebitGrupoConError: g(i.valorConError), ebitGrupoSinEsteError: g(i.valorSinError), diferencia: g(i.diferencia),
+      ebitGrupoConError: g(i.valorConError), ebitGrupoSinEsteError: g(i.valorSinError), efectoDeCorregirEnEbitGrupo: i.valorSinError !== undefined ? gtq(Number(i.valorSinError) - Number(i.valorConError)) : undefined,
       referencia: i.referencia, diferenciaNoConciliada: g(i.diferenciaNoConciliada),
       efectoEbitIndividual: i.efectoEbitIndividual?.map((e: any) => ({ empresa: e.empresa, monto: gtq(Number(e.monto)) })),
       indicadoresAfectados: i.indicadoresAfectados?.map((x: any) => ({ nombre: x.nombre, nivel: x.nivel,
         con: ["roic", "roce"].includes(x.nombre) ? pct(Number(x.con)) : gtq(Number(x.con)),
         sin: ["roic", "roce"].includes(x.nombre) ? pct(Number(x.sin)) : gtq(Number(x.sin)),
-        ...(x.nombre === "roic" ? { conVsWacc: vsWacc(Number(x.con)), sinVsWacc: vsWacc(Number(x.sin)) } : {}) })) })) };
+        ...(x.nombre === "roic" ? { conclusionVsWacc: conclusionWacc(Number(x.con), Number(x.sin)) } : {}) })) })) };
 }
 
 export async function listarAlertas(version?: Version) {
   const a = await fuente.alertas();
-  return (version ? a.filter((x) => x.versiones.includes(version)) : a);
+  // Versión compacta para el modelo: sin listas de filas (gastan cuota). La ubicación completa la muestra la interfaz.
+  return (version ? a.filter((x) => x.versiones.includes(version)) : a).map((x) => ({
+    id: x.id, regla: x.regla, severidad: x.severidad, empresa: x.empresa, versiones: x.versiones,
+    mensaje: x.mensaje, porQueImporta: x.porQueImporta, ubicacion: x.ubicacion?.split(", ")[0],
+  }));
 }
 
 export async function puente(empresa: CodigoEmpresa) {

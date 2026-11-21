@@ -43,6 +43,12 @@ async function completar(params: any) {
 }
 const groq = () => ({ chat: { completions: { create: completar } } });
 
+/** Normaliza el texto del modelo al formato del producto: "9.63 %" → "9.63%", guiones raros → "-". */
+const GUIONES = new RegExp("[" + String.fromCharCode(0x2010) + "-" + String.fromCharCode(0x2015, 0x2212) + "]", "g");
+const ESPACIOS_RAROS = new RegExp("[" + String.fromCharCode(0x00a0, 0x202f) + "]", "g");
+export const limpiar = (t: string) =>
+  t.replace(GUIONES, "-").replace(ESPACIOS_RAROS, " ").replace(/([0-9]) +%/g, "$1%");
+
 export type Respuesta = {
   texto: string;
   fuente: "ia" | "plantilla";
@@ -64,7 +70,7 @@ export async function preguntar(pregunta: string, extraSistema = ""): Promise<Re
   ];
   const resultados: unknown[] = [];
   try {
-    let fallosTool = 0;
+    let fallosTool = 0, vacioReintentado = false;
     for (let i = 0; i < MAX_VUELTAS; i++) {
       let r;
       try {
@@ -81,7 +87,14 @@ export async function preguntar(pregunta: string, extraSistema = ""): Promise<Re
       const msg = r.choices[0].message;
       mensajes.push(msg);
       if (!msg.tool_calls?.length) {
-        return { texto: msg.content ?? "", fuente: "ia", modelo: modeloActivo, herramientasUsadas: usadas, ms: Date.now() - t0,
+        // A veces el modelo responde vacío (sobre todo al negarse). Se le pide una vez más que conteste con texto.
+        if (!msg.content?.trim() && !vacioReintentado) {
+          vacioReintentado = true;
+          mensajes.push({ role: "user", content: "Responde ahora en texto, siguiendo tus reglas, con los datos que ya tienes." });
+          continue;
+        }
+        if (!msg.content?.trim()) throw new Error("El modelo respondió vacío.");
+        return { texto: limpiar(msg.content ?? ""), fuente: "ia", modelo: modeloActivo, herramientasUsadas: usadas, ms: Date.now() - t0,
           grafica: await graficaPara(usadas) };
       }
       for (const tc of msg.tool_calls) {
@@ -108,7 +121,7 @@ async function redactar(prompt: string, respaldo: string): Promise<Respuesta> {
       model: MODELO, temperature: 0,
       messages: [{ role: "system", content: SISTEMA }, { role: "user", content: prompt }],
     });
-    return { texto: r.choices[0].message.content ?? respaldo, fuente: "ia", modelo: modeloActivo, herramientasUsadas: [], ms: Date.now() - t0 };
+    return { texto: limpiar(r.choices[0].message.content ?? respaldo), fuente: "ia", modelo: modeloActivo, herramientasUsadas: [], ms: Date.now() - t0 };
   } catch (e: any) {
     return { texto: respaldo, fuente: "plantilla", herramientasUsadas: [], ms: Date.now() - t0, error: e?.message ?? String(e) };
   }

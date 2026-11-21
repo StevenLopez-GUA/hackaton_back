@@ -1,0 +1,128 @@
+{
+  "¿Qué empresas destruyen valor?": {
+    "texto": "Las empresas que, según los datos corregidos de la versión **real_2025**, están destruyendo valor son:\n\n- **CONC** - ROIC 6.91% (-4.09 pp vs WACC), EVA -Q1,265,625  \n- **TRAC** - ROIC 8.11% (-2.89 pp vs WACC), EVA -Q701,073  \n- **LOGI** - ROIC 8.01% (-2.99 pp vs WACC), EVA -Q477,895  \n- **AGRO** - ROIC 8.20% (-2.80 pp vs WACC), EVA -Q412,735  \n\nEstas cifras indican que el retorno sobre el capital invertido (ROIC) está por debajo del costo de capital (WACC) y que el valor económico creado (EVA) es negativo, lo que significa que cada una de estas compañías está generando menos retorno que el costo de su financiación.  \n\n**Recomendación concreta:** Analizar las causas de la brecha entre ROIC y WACC en cada una de estas empresas y evaluar ajustes operativos, de precios o de estructura de capital que puedan mejorar la rentabilidad y la creación de valor.",
+    "fuente": "ia",
+    "modelo": "openai/gpt-oss-20b",
+    "herramientasUsadas": [
+      {
+        "nombre": "riesgos",
+        "args": {
+          "version": "real_2025"
+        }
+      }
+    ],
+    "ms": 2230,
+    "grafica": {
+      "tipo": "barras",
+      "titulo": "ROIC por empresa · Real 2025",
+      "unidad": "fraccion",
+      "etiquetas": [
+        "HERR",
+        "FERR",
+        "AGRO",
+        "TRAC",
+        "LOGI",
+        "CONC"
+      ],
+      "series": [
+        {
+          "nombre": "ROIC",
+          "valores": [
+            0.156,
+            0.1497,
+            0.082,
+            0.0811,
+            0.0801,
+            0.0691
+          ]
+        }
+      ],
+      "referencia": {
+        "nombre": "WACC",
+        "valor": 0.11
+      },
+      "fuente": "riesgos"
+    }
+  },
+  "puente:HERR": {
+    "texto": "El EBIT de HERR pasó de Q2,260,000.00 a Q2,422,365.22, un incremento de Q162,365.22; el efecto operativo fue Q110,825.53 (68.3%) y el efecto cambiario Q51,539.69 (31.7%). Esto indica que la mayor parte del crecimiento provino del negocio, pero la variación de la tasa MXN-GTQ también jugó un papel relevante. Recomendación: seguir de cerca la exposición cambiaria y considerar coberturas para proteger el margen operativo.",
+    "fuente": "ia",
+    "modelo": "openai/gpt-oss-20b",
+    "herramientasUsadas": [],
+    "ms": 793,
+    "grafica": {
+      "tipo": "cascada",
+      "titulo": "Puente del EBIT · HERR (Real 2025 → Presupuesto 2026)",
+      "unidad": "GTQ",
+      "etiquetas": [
+        "Base",
+        "Efecto operativo",
+        "Efecto cambiario",
+        "Nuevo"
+      ],
+      "series": [
+        {
+          "nombre": "EBIT",
+          "valores": [
+            2260000,
+            110825.53,
+            51539.69,
+            2422365.22
+          ]
+        }
+      ],
+      "fuente": "puente"
+    }
+  },
+  "Proyecta el EBIT del grupo a 2027": {
+    "texto": "**EBIT del grupo proyectado a 2027**  \nQ14,860,669 · 1.76% · supuesto: Proyección por tendencia - se repite en 2027 el cambio observado entre Real 2025 y Reforecast 2026. · limitación: Solo hay 2 puntos de datos (no hay meses), así que es una extrapolación simple, no un modelo estadístico. Usar como escenario, no como certeza.",
+    "fuente": "ia",
+    "modelo": "openai/gpt-oss-20b",
+    "herramientasUsadas": [
+      {
+        "nombre": "proyectar2027",
+        "args": {
+          "metrica": "ebit",
+          "sujeto": "GRUPO"
+        }
+      }
+    ],
+    "ms": 1926,
+    "grafica": {
+      "tipo": "linea",
+      "titulo": "EBIT · Grupo",
+      "unidad": "GTQ",
+      "etiquetas": [
+        "Real 2025",
+        "Presupuesto 2026",
+        "Reforecast 2026",
+        "Proyección 2027"
+      ],
+      "series": [
+        {
+          "nombre": "EBIT",
+          "valores": [
+            14350000,
+            15540966.2,
+            14603102.21,
+            14860668.582279228
+          ],
+          "proyectado": [
+            false,
+            false,
+            false,
+            true
+          ]
+        }
+      ],
+      "fuente": "proyectar2027"
+    }
+  },
+  "¿Cuál es el EBIT de Walmart?": {
+    "texto": "Solo puedo responder sobre las finanzas del grupo (TRAC, AGRO, FERR, CONC, HERR y LOGI): sus indicadores, errores, puentes, tendencias y proyecciones.",
+    "fuente": "ia",
+    "modelo": "openai/gpt-oss-20b",
+    "herramientasUsadas": [],
+    "ms": 570
+  }
+}
