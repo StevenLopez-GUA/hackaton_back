@@ -15,4 +15,5 @@ const r =
 console.log("\n" + r.texto + "\n");
 console.log(`— fuente: ${r.fuente}${r.modelo ? ` (${r.modelo})` : ""} · ${r.ms} ms`);
 if (r.herramientasUsadas.length) console.log("— herramientas:", r.herramientasUsadas.map((h) => `${h.nombre}(${JSON.stringify(h.args)})`).join(", "));
+if (r.grafica) console.log(`— gráfica: ${r.grafica.tipo} "${r.grafica.titulo}" (${r.grafica.etiquetas.length} puntos, fuente ${r.grafica.fuente})`);
 if (r.error) console.log("— error:", r.error);

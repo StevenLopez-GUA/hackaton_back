@@ -20,7 +20,7 @@ Carpeta `agente/` de este repo (rama `agente`). Es un paquete aparte: no toca `s
 cd agente
 npm install
 copy .env.example .env      # pegar GROQ_API_KEY (console.groq.com/keys). NO subir .env
-npm test                    # 11 pruebas (tests/*.prueba.ts; nombre elegido para que el vitest del back no las tome) de cálculos, sin IA ni internet
+npm test                    # 13 pruebas (tests/*.prueba.ts; nombre elegido para que el vitest del back no las tome) de cálculos, sin IA ni internet
 npm run agente -- "¿Qué empresas destruyen valor?"
 npx tsx src/cli.ts --informe
 npx tsx src/cli.ts --alerta A-04
@@ -45,9 +45,37 @@ type Respuesta = {
   herramientasUsadas: { nombre: string; args: unknown }[];
   ms: number;
   error?: string;
+  grafica?: Grafica;                    // opcional: ver abajo
 };
 ```
 Errores de entrada: `400 { "error": { "codigo", "mensaje" } }`. CORS abierto.
+
+### Gráficas (`grafica`)
+La arma el **código** a partir de las herramientas que usó el agente (el modelo nunca genera datos de gráficas). Viene solo cuando hay algo que graficar; el front la dibuja con su propio formato.
+```ts
+type Grafica = {
+  tipo: "barras" | "linea" | "cascada";
+  titulo: string;                       // "ROIC por empresa · Real 2025"
+  unidad: "GTQ" | "fraccion";           // fraccion: 0.0963 = 9.63%
+  etiquetas: string[];                  // eje X
+  series: { nombre: string; valores: (number | null)[]; proyectado?: boolean[] }[]; // null = sin dato
+  referencia?: { nombre: string; valor: number };   // línea horizontal, p. ej. WACC 0.11
+  fuente: string;                       // herramienta que la originó
+};
+```
+| Cuándo | Tipo |
+|---|---|
+| Ranking de empresas / riesgos | `barras` (ROIC con línea de WACC) |
+| Tendencia entre versiones | `linea` |
+| Proyección 2027 | `linea` con el último punto `proyectado: true` (dibujarlo punteado) |
+| Puente (pregunta o `/api/explicar` tipo puente) | `cascada`: base, operativo, cambiario, nuevo |
+| Impacto de una alerta (pregunta o `/api/explicar` tipo alerta) | `barras` con y sin el error |
+| Informe ejecutivo | `linea` del EBIT del grupo con proyección 2027 |
+
+### Reglas de respuesta
+- **Cifras:** solo las del motor, en el formato del producto (`Q14,350,000`, `-Q1,645,012`, `9.63%`, `+0.28 pp`), definido en `src/formato.ts`.
+- **Publicación:** el agente no opina si el grupo es publicable; si le preguntan, responde que eso lo muestra la interfaz.
+- **Alcance:** lo que no es del grupo recibe un mensaje fijo (`FUERA_DE_ALCANCE` en `src/prompts.ts`).
 **Sugerencia para el front:** mostrar una etiqueta "IA" o "Plantilla" según `fuente`, y opcionalmente las `herramientasUsadas` como "fuentes consultadas" (refuerza la trazabilidad en el pitch).
 
 ## Cómo funciona
@@ -134,5 +162,7 @@ Bugs encontrados y corregidos en QA: mezcla de GTQ/MXN en el puente, impacto tot
 | `src/agente.ts` | `preguntar()`, `explicar()`, `informe()` + manejo de límites |
 | `src/plantillas.ts` | Textos de respaldo |
 | `src/servidor.ts` / `src/cli.ts` | API HTTP / terminal |
-| `tests/analisis.prueba.ts` | 11 pruebas |
+| `src/formato.ts` | Formato único de cifras |
+| `src/graficas.ts` | Gráficas armadas por código |
+| `tests/analisis.prueba.ts` | 13 pruebas |
 | `fixtures/` | Datos de ejemplo del v3 |

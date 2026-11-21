@@ -11,7 +11,7 @@ npx tsx src/cli.ts --informe
 npx tsx src/cli.ts --alerta A-04
 npx tsx src/cli.ts --puente HERR
 npx tsx src/servidor.ts      # http://localhost:3001
-npm test                     # 11 pruebas de los cálculos (sin IA ni internet)
+npm test                     # 13 pruebas de los cálculos (sin IA ni internet)
 ```
 
 Modelo: `openai/gpt-oss-120b` en Groq (`GROQ_MODEL` en `.env`). La capa gratuita permite 8,000 tokens por minuto; el cliente reintenta solo si se alcanza el límite.

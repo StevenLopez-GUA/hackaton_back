@@ -7,6 +7,8 @@ import { fuente } from "./fuente.js";
 import type { CodigoEmpresa } from "./contrato.js";
 import { formatearPuente } from "./analisis.js";
 import * as A from "./analisis.js";
+import { q } from "./formato.js";
+import { graficaPara, type Grafica } from "./graficas.js";
 
 const MODELO = process.env.GROQ_MODEL ?? "openai/gpt-oss-120b";
 const MAX_VUELTAS = 8;
@@ -48,6 +50,8 @@ export type Respuesta = {
   herramientasUsadas: { nombre: string; args: unknown }[];
   ms: number;
   error?: string;
+  /** Gráfica armada por código a partir de las herramientas usadas (ver src/graficas.ts). */
+  grafica?: Grafica;
 };
 
 /** Agente con herramientas: el modelo decide qué consultar, el código calcula, el modelo redacta. */
@@ -77,7 +81,8 @@ export async function preguntar(pregunta: string, extraSistema = ""): Promise<Re
       const msg = r.choices[0].message;
       mensajes.push(msg);
       if (!msg.tool_calls?.length) {
-        return { texto: msg.content ?? "", fuente: "ia", modelo: modeloActivo, herramientasUsadas: usadas, ms: Date.now() - t0 };
+        return { texto: msg.content ?? "", fuente: "ia", modelo: modeloActivo, herramientasUsadas: usadas, ms: Date.now() - t0,
+          grafica: await graficaPara(usadas) };
       }
       for (const tc of msg.tool_calls) {
         const args = JSON.parse(tc.function.arguments || "{}");
@@ -91,7 +96,8 @@ export async function preguntar(pregunta: string, extraSistema = ""): Promise<Re
   } catch (e: any) {
     // Respaldo: devolvemos los datos verificados que alcanzamos a consultar.
     const datos = resultados.length ? resultados : await ejecutar("resumenGrupo", { version: "real_2025" });
-    return { texto: plantillaGenerica(datos), fuente: "plantilla", herramientasUsadas: usadas, ms: Date.now() - t0, error: e?.message ?? String(e) };
+    return { texto: plantillaGenerica(datos), fuente: "plantilla", herramientasUsadas: usadas, ms: Date.now() - t0, error: e?.message ?? String(e),
+      grafica: await graficaPara(usadas) };
   }
 }
 
@@ -117,15 +123,17 @@ export async function explicar(p: { tipo: "alerta"; id: string } | { tipo: "puen
     const contextoGrupo = imp && {
       advertencia: "Estas cifras son del GRUPO completo con TODOS los errores juntos, no solo de esta alerta ni de esta empresa.",
       version: imp.version,
-      ebitGrupoConTodosLosErrores: `GTQ ${Math.round(Number(imp.ebitConErrores)).toLocaleString("en-US")}`,
-      ebitGrupoCorregido: `GTQ ${Math.round(Number(imp.ebitCorregido)).toLocaleString("en-US")}`,
+      ebitGrupoConTodosLosErrores: q(Number(imp.ebitConErrores)),
+      ebitGrupoCorregido: q(Number(imp.ebitCorregido)),
       nota: imp.nota,
     };
-    return redactar(PROMPT_ALERTA(a, contextoGrupo), plantillaAlerta(a));
+    const r = await redactar(PROMPT_ALERTA(a, contextoGrupo), plantillaAlerta(a));
+    return { ...r, grafica: await graficaPara([{ nombre: "impactoPorAlerta", args: { version: a.versiones[0], alertaId: a.id } }]) };
   }
   const pu = await fuente.puente(p.empresa);
   if (!pu) return { texto: `No hay puente calculado para ${p.empresa}.`, fuente: "plantilla", herramientasUsadas: [], ms: 0 };
-  return redactar(PROMPT_PUENTE(formatearPuente(pu)), plantillaPuente(pu));
+  const r = await redactar(PROMPT_PUENTE(formatearPuente(pu)), plantillaPuente(pu));
+  return { ...r, grafica: await graficaPara([{ nombre: "puente", args: { empresa: p.empresa } }]) };
 }
 
 /** Informe ejecutivo completo (usa el agente con herramientas). */
@@ -142,5 +150,6 @@ export async function informe(): Promise<Respuesta> {
   const { contexto, ...proy } = datos.proyeccionEbit2027 as any;
   const r = await redactar(`${PROMPT_INFORME}\nDatos verificados: ${JSON.stringify({ ...datos, proyeccionEbit2027: proy })}`,
     plantillaGenerica(datos));
-  return { ...r, herramientasUsadas: Object.keys(datos).map((nombre) => ({ nombre, args: {} })) };
+  return { ...r, herramientasUsadas: Object.keys(datos).map((nombre) => ({ nombre, args: {} })),
+    grafica: await graficaPara([{ nombre: "proyectar2027", args: { sujeto: "GRUPO", metrica: "ebit" } }]) };
 }

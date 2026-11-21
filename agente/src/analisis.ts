@@ -5,21 +5,20 @@ import { EMPRESAS, VERSIONES, type CodigoEmpresa, type Indicadores, type Version
 export type Metrica = "ventas" | "ebit" | "nopat" | "eva" | "roic" | "roce";
 const PORCENTAJES: Metrica[] = ["roic", "roce"];
 
-const pct = (x: number) => `${(x * 100).toFixed(2)}%`;
-const gtq = (x: number) => `GTQ ${Math.round(x).toLocaleString("en-US")}`;
+import { q as gtq, pct, puntos, local } from "./formato.js";
 /** Comparación contra el WACC hecha por código (los modelos pequeños se equivocan al comparar). */
 export const vsWacc = (roic: number | null, wacc = 0.11) =>
   roic === null ? "sin dato" : roic >= wacc ? `POR ENCIMA del WACC (${pct(wacc)}): crea valor` : `POR DEBAJO del WACC (${pct(wacc)}): destruye valor`;
 export const fmt = (m: Metrica, x: number | null) => (x === null ? "sin dato" : PORCENTAJES.includes(m) ? pct(x) : gtq(x));
 
-function valor(ind: Indicadores | null | undefined, m: Metrica): number | null {
+export function valor(ind: Indicadores | null | undefined, m: Metrica): number | null {
   if (!ind) return null;
   const v = (ind as any)[m];
   if (v === undefined || v === null) return null;
   return Number(typeof v === "string" ? v : v.valor);
 }
 
-async function indicadores(sujeto: CodigoEmpresa | "GRUPO", version: Version) {
+export async function indicadores(sujeto: CodigoEmpresa | "GRUPO", version: Version) {
   const c = await fuente.consolidado(version);
   return sujeto === "GRUPO" ? c.grupoCorregido ?? c.grupo : c.empresas[sujeto]?.indicadores;
 }
@@ -33,7 +32,7 @@ export async function tendencia(sujeto: CodigoEmpresa | "GRUPO", m: Metrica) {
   // Para ROIC/ROCE el cambio se expresa en puntos porcentuales, no en % de un %.
   const cambio = (a: number | null, b: number | null) => {
     if (a === null || b === null) return "sin dato";
-    if (esPct) return `${((b - a) * 100).toFixed(2)} puntos porcentuales`;
+    if (esPct) return puntos(b - a);
     return a === 0 ? "sin dato" : `${pct((b - a) / Math.abs(a))} (${gtq(b - a)})`;
   };
   const desvio = p !== null && f !== null ? f - p : null;
@@ -42,7 +41,7 @@ export async function tendencia(sujeto: CodigoEmpresa | "GRUPO", m: Metrica) {
     valores: Object.fromEntries(VERSIONES.map((v) => [v, fmt(m, vals[v])])),
     cambio_real2025_a_ppto2026: cambio(r, p),
     cambio_real2025_a_reforecast2026: cambio(r, f),
-    desvioReforecastVsPpto: desvio === null ? "sin dato" : esPct ? `${(desvio * 100).toFixed(2)} puntos porcentuales` : gtq(desvio),
+    desvioReforecastVsPpto: desvio === null ? "sin dato" : esPct ? puntos(desvio) : gtq(desvio),
     lectura: desvio === null ? "No hay datos suficientes de 2026 para este sujeto."
       : desvio < 0 ? "El reforecast quedó POR DEBAJO del presupuesto: la empresa va peor de lo planeado."
       : "El reforecast quedó igual o POR ENCIMA del presupuesto.",
@@ -63,7 +62,7 @@ export async function proyectar2027(sujeto: CodigoEmpresa | "GRUPO", m: Metrica)
   return {
     sujeto, metrica: m, tipoDato: "proyectado",
     base_reforecast_2026: fmt(m, f),
-    crecimientoAplicado: PORCENTAJES.includes(m) ? `${((f - r) * 100).toFixed(2)} puntos` : pct(g),
+    crecimientoAplicado: PORCENTAJES.includes(m) ? puntos(f - r) : pct(g),
     proyeccion2027: fmt(m, p2027),
     supuesto: "Proyección por tendencia: se repite en 2027 el cambio observado entre Real 2025 y Reforecast 2026.",
     limitacion: "Solo hay 2 puntos de datos (no hay meses), así que es una extrapolación simple, no un modelo estadístico. Usar como escenario, no como certeza.",
@@ -87,7 +86,7 @@ export async function riesgos(version: Version = "real_2025") {
     grupo: g ? { roic: fmt("roic", valor(g, "roic")), eva: fmt("eva", valor(g, "eva")),
       destruyeValor: (valor(g, "roic") ?? 0) < wacc } : "sin dato",
     destruyenValor: filas.filter((f) => f.roic < wacc || f.eva < 0)
-      .map((f) => ({ empresa: f.empresa, roic: pct(f.roic), eva: gtq(f.eva), brechaVsWacc: `${((f.roic - wacc) * 100).toFixed(2)} puntos` })),
+      .map((f) => ({ empresa: f.empresa, roic: pct(f.roic), eva: gtq(f.eva), brechaVsWacc: puntos(f.roic - wacc) })),
     creanValor: filas.filter((f) => f.roic >= wacc && f.eva >= 0)
       .map((f) => ({ empresa: f.empresa, roic: pct(f.roic), eva: gtq(f.eva) })),
     sinDatoPorEmpresa: filas.length === 0 ? "El detalle por empresa no está disponible para esta versión." : undefined,
@@ -102,7 +101,6 @@ export async function resumenGrupo(version: Version = "real_2025") {
   const g = c.grupoCorregido;
   return {
     version, tipoDato: "real/calculado",
-    publicable: c.publicable,
     alertas: { bloqueantes: alertas.filter((a) => a.severidad === "bloqueante").length,
       advertencias: alertas.filter((a) => a.severidad === "advertencia").length },
     grupoCorregido: g ? {
@@ -184,8 +182,8 @@ export async function puente(empresa: CodigoEmpresa) {
 
 /** Puente ya formateado con la moneda en cada cifra, para que el modelo no mezcle GTQ con moneda local. */
 export function formatearPuente(p: import("./contrato.js").Puente) {
-  const g = (s: string) => `GTQ ${Number(s).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  const l = (s: string) => `${p.moneda} ${Number(s).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const g = (s: string) => gtq(Number(s), 2);
+  const l = (s: string) => local(p.moneda, Number(s));
   const cambioTotal = Number(p.nuevo) - Number(p.base);
   return {
     empresa: p.empresa, metrica: "EBIT", tipoDato: "calculado",
