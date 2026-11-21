@@ -1,0 +1,15 @@
+# Blueprint de Render: Dashboard → New → Blueprint → este repo. Cada push a main redespliega.
+services:
+  - type: web
+    name: hackaton-back
+    runtime: node
+    plan: free
+    branch: main
+    # tsx (devDependency) es el runtime de `npm start`, así que se instalan también las de desarrollo.
+    buildCommand: npm ci --include=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
