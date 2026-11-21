@@ -1,0 +1,110 @@
+[
+  {
+    "id": "A-01",
+    "regla": "total",
+    "severidad": "advertencia",
+    "empresa": "AGRO",
+    "versiones": [
+      "real_2025"
+    ],
+    "filaIds": [
+      "02_agroinsumos_honduras_cierre2025.xlsx:Balance_General:13"
+    ]
+  },
+  {
+    "id": "A-02",
+    "regla": "intercompania",
+    "severidad": "bloqueante",
+    "empresa": [
+      "LOGI",
+      "AGRO"
+    ],
+    "versiones": [
+      "real_2025"
+    ],
+    "referencia": "IC-2025-05",
+    "filaIds": [
+      "02_agroinsumos_honduras_cierre2025.xlsx:Intercompania:6",
+      "06_logistica_transporte_tico_cierre2025.xlsx:Intercompania:6"
+    ]
+  },
+  {
+    "id": "A-03",
+    "regla": "moneda",
+    "severidad": "bloqueante",
+    "empresa": "AGRO",
+    "versiones": [
+      "real_2025",
+      "ppto_2026",
+      "reforecast_2026"
+    ],
+    "filaIds": [
+      "02_agroinsumos_honduras_cierre2025.xlsx:Presupuesto:12:ppto_2026",
+      "02_agroinsumos_honduras_cierre2025.xlsx:Presupuesto:12:real_2025",
+      "02_agroinsumos_honduras_cierre2025.xlsx:Presupuesto:12:reforecast_2026"
+    ]
+  },
+  {
+    "id": "A-04",
+    "regla": "signo",
+    "severidad": "bloqueante",
+    "empresa": "CONC",
+    "versiones": [
+      "ppto_2026"
+    ],
+    "filaIds": [
+      "04_concretos_nacionales_cierre2025.xlsx:Presupuesto:8:ppto_2026"
+    ]
+  },
+  {
+    "id": "A-05",
+    "regla": "moneda",
+    "severidad": "bloqueante",
+    "empresa": "CONC",
+    "versiones": [
+      "real_2025",
+      "ppto_2026",
+      "reforecast_2026"
+    ],
+    "filaIds": [
+      "04_concretos_nacionales_cierre2025.xlsx:Presupuesto:9:ppto_2026",
+      "04_concretos_nacionales_cierre2025.xlsx:Presupuesto:9:real_2025",
+      "04_concretos_nacionales_cierre2025.xlsx:Presupuesto:9:reforecast_2026"
+    ]
+  },
+  {
+    "id": "A-06",
+    "regla": "intercompania",
+    "severidad": "bloqueante",
+    "empresa": [
+      "HERR",
+      "TRAC"
+    ],
+    "versiones": [
+      "real_2025"
+    ],
+    "referencia": "IC-2025-03",
+    "filaIds": [
+      "05_herramientas_pro_mexico_cierre2025.xlsx:Intercompania:7"
+    ]
+  },
+  {
+    "id": "A-07",
+    "regla": "duplicado",
+    "severidad": "bloqueante",
+    "empresa": "HERR",
+    "versiones": [
+      "real_2025",
+      "ppto_2026",
+      "reforecast_2026"
+    ],
+    "filaIds": [
+      "05_herramientas_pro_mexico_cierre2025.xlsx:Presupuesto:6:ppto_2026",
+      "05_herramientas_pro_mexico_cierre2025.xlsx:Presupuesto:6:real_2025",
+      "05_herramientas_pro_mexico_cierre2025.xlsx:Presupuesto:6:reforecast_2026",
+      "05_herramientas_pro_mexico_cierre2025.xlsx:Presupuesto:17:ppto_2026",
+      "05_herramientas_pro_mexico_cierre2025.xlsx:Presupuesto:17:real_2025",
+      "05_herramientas_pro_mexico_cierre2025.xlsx:Presupuesto:17:reforecast_2026"
+    ]
+  }
+]
