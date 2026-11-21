@@ -13,3 +13,28 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "22"
+
+  # Agente IA (Groq). Vive en la rama `agente`, carpeta agente/ (paquete aparte, no toca el back).
+  - type: web
+    name: hackaton-agente
+    runtime: node
+    plan: free
+    branch: agente
+    rootDir: agente
+    buildCommand: npm ci --include=dev
+    startCommand: npm run servidor
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: FUENTE
+        value: http
+      - key: BACKEND_URL
+        value: https://hackaton-back-7z3l.onrender.com/api
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: GROQ_MODEL_RESPALDO
+        value: openai/gpt-oss-20b
+      # Secreto: Render lo pide al sincronizar el Blueprint. Nunca va en el repo.
+      - key: GROQ_API_KEY
+        sync: false

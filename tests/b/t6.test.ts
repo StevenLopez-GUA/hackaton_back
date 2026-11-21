@@ -76,7 +76,7 @@ describe("simularEscenario", () => {
     });
     expect(consolidado.publicable).toBe(true);
     expect(consolidado.grupo!.ebit.valor.toFixed(2)).toBe("14350000.00");
-    expect(escenario.correccionesAplicadas).toEqual(["A-03", "A-04", "A-05", "A-07"]);
+    expect(escenario.correccionesAplicadas).toEqual(["A-03", "A-05", "A-07"]);
   });
 
   it("sin aceptar IC sigue bloqueado; no muta el dataset", () => {
@@ -100,4 +100,15 @@ describe("simularEscenario", () => {
     expect(() => simularEscenario(fixture, { aplicarCorrecciones: ["A-99"] })).toThrow(ErrorEntrada);
     expect(() => simularEscenario(fixture, { tasas: { MXN: { promedio: "-1" } } })).toThrow(ErrorEntrada);
   });
+});
+
+describe("flujo completo en las versiones 2026", () => {
+  for (const [version, ebit] of [["ppto_2026", "15540966.20"], ["reforecast_2026", "14603102.21"]] as const) {
+    it(`${version}: "todas" sin aceptar IC publica el corregido`, () => {
+      const { consolidado, escenario } = simularEscenario(fixture, { version, aplicarCorrecciones: "todas" });
+      expect(consolidado.publicable).toBe(true);
+      expect(consolidado.grupo!.ebit.valor.minus(ebit).abs().lte("0.01")).toBe(true);
+      expect(escenario.correccionesAplicadas).toEqual(version === "ppto_2026" ? ["A-03", "A-04", "A-05", "A-07"] : ["A-03", "A-05", "A-07"]);
+    });
+  }
 });

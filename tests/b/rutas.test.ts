@@ -102,8 +102,31 @@ describe("endpoints T6", () => {
     expect(res.status).toBe(200);
     expect(body.publicable).toBe(true);
     expect(body.grupo.ebit.valor).toBe("14350000.00");
-    expect(body.escenario).toEqual({ correccionesAplicadas: ["A-03", "A-04", "A-05", "A-07"], icAceptadas: ["IC-2025-03", "IC-2025-05"], tasasEditadas: ["MXN.promedio"] });
+    expect(body.escenario).toEqual({ correccionesAplicadas: ["A-03", "A-05", "A-07"], icAceptadas: ["IC-2025-03", "IC-2025-05"], tasasEditadas: ["MXN.promedio"] });
     const mal = await fetch(base + "/escenario", { method: "POST", headers: { "content-type": "application/json" }, body: "{\"version\":\"x\"}" });
     expect(mal.status).toBe(400);
+  });
+});
+
+describe("pedidos del front", () => {
+  it("/consolidado trae wacc, ebitSinCorregir y moneda por empresa", async () => {
+    const { body } = await get("/consolidado?version=real_2025");
+    expect(body.wacc).toBe("0.1100");
+    expect(body.ebitSinCorregir).toBe("-386104.70");
+    expect(body.empresas.HERR.moneda).toBe("MXN");
+  });
+
+  it("POST /reset vuelve al dataset del reto", async () => {
+    const put = await fetch(base + "/tasas", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ MXN: { promedio: "2.50" } }),
+    });
+    expect(put.status).toBe(200);
+    expect((await get("/tasas")).body.MXN.promedio).toBe("2.5000");
+    const reset = await fetch(base + "/reset", { method: "POST" });
+    expect(await reset.json()).toEqual({ ok: true, totalRegistros: 213 });
+    expect((await get("/tasas")).body.MXN.promedio).toBe("2.3500");
+    expect((await get("/consolidado")).body.ebitSinCorregir).toBe("-386104.70");
   });
 });

@@ -63,10 +63,11 @@ export function simularEscenario(actual: Dataset, body: unknown): ResultadoEscen
   let dataset: Dataset = { ...actual, tasas, registros: convertir(actual.registros, tasas) };
 
   // 2. Correcciones en orden. Los IDs son los del dataset actual; corregir() actúa por filaIds.
+  //    "todas" = las corregibles de esta versión (A-04 es solo de ppto_2026: no aparece en real_2025).
   const alertasActuales = obtenerAlertas(actual);
   const elegidas =
     pedidas === "todas"
-      ? alertasActuales.filter((a) => corregir(actual, a) !== null)
+      ? alertasActuales.filter((a) => a.versiones.includes(version) && corregir(actual, a) !== null)
       : pedidas.map((id) => {
           const a = alertasActuales.find((x) => x.id === id);
           if (!a) throw new ErrorEntrada("ALERTA_DESCONOCIDA", `No existe la alerta ${id}`);
