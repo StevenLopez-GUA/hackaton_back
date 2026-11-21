@@ -1,16 +1,17 @@
 // PERSONA B. Endpoints de cálculo.
 import { Router, type Response } from "express";
 import type Decimal from "decimal.js";
-import { calcular } from "../calculo/consolidar";
+import { calcular, calcularGrupo } from "../calculo/consolidar";
 import { ErrorEntrada, simularEscenario } from "../calculo/escenario";
 import { impactoErrores, type ItemImpacto } from "../calculo/impacto";
 import { METRICAS_PUENTE, puente, type MetricaPuente } from "../calculo/puente";
 import { METRICAS, type Metrica } from "../calculo/indicadores";
 import { trazar } from "../calculo/trazabilidad";
-import { getDataset } from "../estado";
+import { getDataset, setDataset } from "../estado";
+import { cargarDatasetFixture } from "../fixtures";
 import { enviarError, fraccion, monto } from "../http";
 import { obtenerAlertas } from "../pipeline";
-import { VERSIONES, type CodigoEmpresa, type Consolidado, type Indicadores, type Version } from "../types";
+import { VERSIONES, type CodigoEmpresa, type Consolidado, type Dataset, type Indicadores, type Version } from "../types";
 
 const r = Router();
 
@@ -29,14 +30,21 @@ const serializarIndicadores = (i: Indicadores) =>
     ]),
   );
 
-const serializarConsolidado = (c: Consolidado) => ({
+// `base` = dataset sin escenario: de ahí salen wacc, moneda por empresa y el EBIT del grupo sin corregir.
+const serializarConsolidado = (c: Consolidado, base: Dataset) => ({
   version: c.version,
   publicable: c.publicable,
+  wacc: fraccion(base.parametros.wacc),
+  ebitSinCorregir: monto(calcularGrupo(base, c.version).ebit.valor),
   grupo: c.grupo && serializarIndicadores(c.grupo),
   empresas: Object.fromEntries(
     Object.entries(c.empresas).map(([e, x]) => [
       e,
-      { conAlertas: x.conAlertas, indicadores: serializarIndicadores(x.indicadores) },
+      {
+        moneda: base.empresas[e as CodigoEmpresa].moneda,
+        conAlertas: x.conAlertas,
+        indicadores: serializarIndicadores(x.indicadores),
+      },
     ]),
   ),
   eliminacionesIC: {
@@ -50,7 +58,7 @@ r.get("/consolidado", (req, res) => {
   const version = leerVersion(req.query.version, res);
   if (!version) return;
   const dataset = getDataset();
-  res.json(serializarConsolidado(calcular(dataset, version, obtenerAlertas(dataset))));
+  res.json(serializarConsolidado(calcular(dataset, version, obtenerAlertas(dataset)), dataset));
 });
 
 r.get("/trazabilidad", (req, res) => {
@@ -159,12 +167,20 @@ r.get("/puente", (req, res) => {
 
 r.post("/escenario", (req, res) => {
   try {
-    const { consolidado, escenario } = simularEscenario(getDataset(), req.body);
-    res.json({ ...serializarConsolidado(consolidado), escenario });
+    const dataset = getDataset();
+    const { consolidado, escenario } = simularEscenario(dataset, req.body);
+    res.json({ ...serializarConsolidado(consolidado, dataset), escenario });
   } catch (e) {
     if (e instanceof ErrorEntrada) return enviarError(res, 400, e.codigo, e.message);
     throw e;
   }
+});
+
+// Vuelve al dataset del reto (fixture) sin esperar un reinicio. Afecta a todos, como /upload.
+r.post("/reset", (_req, res) => {
+  const dataset = cargarDatasetFixture();
+  setDataset(dataset);
+  res.json({ ok: true, totalRegistros: dataset.registros.length });
 });
 
 export default r;
