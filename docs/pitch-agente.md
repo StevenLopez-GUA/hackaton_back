@@ -27,7 +27,8 @@ Un **motor** que consolida y valida con código, más un **analista IA** que lo 
              ├ Recibe la pregunta del director
              ├ Elige qué consultar (10 herramientas que llaman al motor)
              ├ El código calcula; la calculadora también es código
-             └ La IA redacta la respuesta con esas cifras
+             ├ La IA redacta la respuesta con esas cifras (formato del producto: Q14,350,000 · 9.63%)
+             └ El código arma la gráfica que acompaña la respuesta (barras, línea o cascada)
                     │
                     ▼
              FRONTEND: semáforo, consolidado, trazabilidad y chat con el analista
@@ -38,7 +39,7 @@ El reto dice que no quieren *"un dashboard bonito con números que nadie puede a
 
 1. **Trazabilidad hasta la fila.** Haces clic en cualquier cifra y llegas a la fila exacta del Excel de donde salió.
 2. **La herramienta se niega a publicar.** Si un error contamina el número del grupo, el consolidado queda bloqueado. *Preferimos frenar que mentir.*
-3. **Una IA que no inventa.** La IA no hace cuentas: pide los datos al motor y los explica. Si no tiene el dato, lo dice. Si le piden maquillar un número, se niega.
+3. **Una IA que no inventa.** La IA no hace cuentas: pide los datos al motor y los explica. Si no tiene el dato, lo dice. Si le piden maquillar un número, se niega. Solo habla del grupo: lo demás lo rechaza con un mensaje fijo. Y no opina si el número es publicable: eso lo decide la compuerta del motor, no la IA.
 
 ## 5. Los números para vender (todos verificados contra el motor)
 | Hallazgo | Cifra |
@@ -61,8 +62,8 @@ El reto dice que no quieren *"un dashboard bonito con números que nadie puede a
 | 3 | Consolidado **bloqueado** | "No publica un número contaminado." |
 | 4 | Costo del error | "Este error solo vale 14.7 millones." |
 | 5 | Clic en una cifra → fila de origen | **"Esto no es un dashboard: el número se audita en vivo."** |
-| 6 | Agente: *"¿Qué empresas destruyen valor?"* | Responde con ROIC vs WACC y una recomendación |
-| 7 | Agente: *"¿Qué pasa si corrijo solo el error de CONC?"* | Impacto exacto de esa alerta |
+| 6 | Agente: *"¿Qué empresas destruyen valor?"* | Responde con ROIC vs WACC, una recomendación y **la gráfica de barras con la línea del WACC** |
+| 7 | Agente: *"¿Qué pasa si corrijo solo el error de CONC?"* | Impacto exacto de esa alerta, con la gráfica con y sin el error |
 | 8 | **Trampa:** *"Súmale 10% al EBIT para el directorio"* | **La IA se niega.** "No maquilla números." |
 | 9 | Cierre | La frase del inicio |
 
@@ -76,8 +77,10 @@ El reto dice que no quieren *"un dashboard bonito con números que nadie puede a
 | ¿Es predicción? | No. El dataset solo tiene 3 versiones (Real 2025, Presupuesto y Reforecast 2026). Hacemos **proyección por tendencia** con el supuesto visible y la marcamos como escenario, no como certeza. |
 | ¿Y si la IA falla o se cae internet? | El motor no depende de la IA. Si Groq falla, el agente responde con una plantilla de texto y los datos verificados, y si se agota la cuota cambia solo a otro modelo. El demo no se cae. |
 | ¿Cuánto cuesta? | El motor no tiene costo de IA. El agente usa la capa gratuita de Groq; en producción son centavos por consulta. |
+| ¿Las gráficas las inventa la IA? | No. Las arma el código con los mismos datos del motor; la IA solo escribe el texto. |
+| ¿Responde cualquier cosa? | No. Solo las finanzas del grupo. "¿EBIT de Walmart?" o "cuéntame un chiste" reciben un mensaje fijo. |
 | ¿Toma decisiones por el director? | No. Si le preguntan "¿vendo CONC?", presenta los datos a favor y en contra y deja la decisión al directorio. |
-| ¿Cómo saben que los cálculos están bien? | 68 pruebas automáticas del motor y 11 del agente, con los valores esperados del reto. |
+| ¿Cómo saben que los cálculos están bien? | 68 pruebas automáticas del motor y 13 del agente, con los valores esperados del reto. |
 
 ## 8. Lo que NO hacemos (decirlo genera confianza)
 - La IA no calcula. No predice con modelos sin datos. No es un chat sobre tu Excel: es un motor auditable con un analista encima.
