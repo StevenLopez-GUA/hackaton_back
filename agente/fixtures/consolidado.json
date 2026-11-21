@@ -1,0 +1,44 @@
+{
+  "_nota": "Valores esperados de backend_idea (v3).md. Real 2025 por empresa = corregido. 2026 solo a nivel grupo (el v3 no publica el detalle por empresa).",
+  "real_2025": {
+    "version": "real_2025",
+    "publicable": false,
+    "grupo": null,
+    "grupoCorregido": {
+      "ventas": { "valor": "175000000.00", "origen": [] },
+      "ebit": { "valor": "14350000.00", "origen": [] },
+      "roic": "0.0963", "roce": "0.1425",
+      "eva": { "valor": "-1645012.00", "origen": [] }
+    },
+    "empresas": {
+      "FERR": { "conAlertas": false, "indicadores": { "ventas": { "valor": "53850000", "origen": [] }, "ebit": { "valor": "4410000", "origen": [] }, "nopat": { "valor": "3432500", "origen": [] }, "roic": "0.1497", "roce": "0.2212", "eva": { "valor": "909925", "origen": [] } } },
+      "HERR": { "conAlertas": true,  "indicadores": { "ventas": { "valor": "21660000", "origen": [] }, "ebit": { "valor": "2260000", "origen": [] }, "nopat": { "valor": "1687000", "origen": [] }, "roic": "0.1560", "roce": "0.2426", "eva": { "valor": "497391", "origen": [] } } },
+      "CONC": { "conAlertas": true,  "indicadores": { "ventas": { "valor": "30000000", "origen": [] }, "ebit": { "valor": "2450000", "origen": [] }, "nopat": { "valor": "2137500", "origen": [] }, "roic": "0.0691", "roce": "0.0910", "eva": { "valor": "-1265625", "origen": [] } } },
+      "TRAC": { "conAlertas": true,  "indicadores": { "ventas": { "valor": "38420000", "origen": [] }, "ebit": { "valor": "2390000", "origen": [] }, "nopat": { "valor": "1967498", "origen": [] }, "roic": "0.0811", "roce": "0.1241", "eva": { "valor": "-701073", "origen": [] } } },
+      "LOGI": { "conAlertas": true,  "indicadores": { "ventas": { "valor": "14570000", "origen": [] }, "ebit": { "valor": "1570000", "origen": [] }, "nopat": { "valor": "1279000", "origen": [] }, "roic": "0.0801", "roce": "0.1210", "eva": { "valor": "-477895", "origen": [] } } },
+      "AGRO": { "conAlertas": true,  "indicadores": { "ventas": { "valor": "25000000", "origen": [] }, "ebit": { "valor": "1465000", "origen": [] }, "nopat": { "valor": "1211250", "origen": [] }, "roic": "0.0820", "roce": "0.1195", "eva": { "valor": "-412735", "origen": [] } } }
+    }
+  },
+  "ppto_2026": {
+    "version": "ppto_2026",
+    "publicable": false,
+    "grupo": null,
+    "grupoCorregido": {
+      "ebit": { "valor": "15540966", "origen": [] },
+      "roic": "0.0991", "roce": "0.1467",
+      "eva": { "valor": "-1367520", "origen": [] }
+    },
+    "empresas": {}
+  },
+  "reforecast_2026": {
+    "version": "reforecast_2026",
+    "publicable": false,
+    "grupo": null,
+    "grupoCorregido": {
+      "ebit": { "valor": "14603102", "origen": [] },
+      "roic": "0.0915", "roce": "0.1376",
+      "eva": { "valor": "-2340549", "origen": [] }
+    },
+    "empresas": {}
+  }
+}

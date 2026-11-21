@@ -1,0 +1,5 @@
+[
+  { "version": "real_2025", "ebitConErrores": "-386105", "ebitCorregido": "14350000", "roicCon": "-0.0269", "roicSin": "0.0963", "evaConErrores": "-16381117", "evaCorregido": "-1645012", "nota": "Con errores, CONC pasa a EBIT -12,286,105 (ROIC -40.72%) y HERR a ventas 24,060,000 y EBIT 4,660,000 (ROIC 37.79%) por el duplicado." },
+  { "version": "ppto_2026", "ebitConErrores": "5771120", "ebitCorregido": "15540966", "roicCon": "0.0216", "roicSin": "0.0991", "evaConErrores": "-11137366", "evaCorregido": "-1367520", "nota": "Los errores se compensan: el signo negativo infla el EBIT en 6,720,000 y la depreciación en USD lo baja en 16,489,846. El neto (-9,769,846) esconde el tamaño real de cada error." },
+  { "version": "reforecast_2026", "ebitConErrores": "-1619052", "ebitCorregido": "14603102", "roicCon": "-0.0364", "roicSin": "0.0915", "evaConErrores": "-18562703", "evaCorregido": "-2340549" }
+]

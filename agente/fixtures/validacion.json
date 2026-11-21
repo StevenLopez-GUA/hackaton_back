@@ -1,0 +1,11 @@
+{
+  "alertas": [
+    { "id": "A-01", "regla": "total", "severidad": "advertencia", "empresa": "AGRO", "versiones": ["real_2025"], "ubicacion": "02_agroinsumos_honduras_cierre2025.xlsx:Balance_General:13", "mensaje": "\"Total activo corriente\" excede en 120,000 HNL la suma de sus líneas." },
+    { "id": "A-02", "regla": "moneda", "severidad": "bloqueante", "empresa": "AGRO", "versiones": ["real_2025", "ppto_2026", "reforecast_2026"], "ubicacion": "02_agroinsumos_honduras_cierre2025.xlsx:Presupuesto:12", "mensaje": "Gasto financiero en NIO, moneda sin tasa de cambio." },
+    { "id": "A-03", "regla": "signo", "severidad": "bloqueante", "empresa": "CONC", "versiones": ["ppto_2026"], "ubicacion": "04_concretos_nacionales_cierre2025.xlsx:Presupuesto:8", "mensaje": "Gastos de operación en -3,360,000 (negativo) en Presupuesto 2026." },
+    { "id": "A-04", "regla": "moneda", "severidad": "bloqueante", "empresa": "CONC", "versiones": ["real_2025", "ppto_2026", "reforecast_2026"], "ubicacion": "04_concretos_nacionales_cierre2025.xlsx:Presupuesto:9", "mensaje": "Depreciación en USD, pero CONC reporta en GTQ.", "porQueImporta": "Convertida como USD, la depreciación pasa de 2,200,000 a 16,936,105 GTQ.", "comoSeCorrige": "Cambiar la moneda de la fila a GTQ en el archivo de CONC." },
+    { "id": "A-05", "regla": "duplicado", "severidad": "bloqueante", "empresa": "HERR", "versiones": ["real_2025", "ppto_2026", "reforecast_2026"], "ubicacion": "05_herramientas_pro_mexico_cierre2025.xlsx:Presupuesto:6 y 17", "mensaje": "\"Ventas intercompañía - FERR\" repetida." },
+    { "id": "A-06", "regla": "intercompania", "severidad": "bloqueante", "empresa": ["LOGI", "AGRO"], "versiones": ["real_2025"], "ubicacion": "IC-2025-05, LOGI fila 6 / AGRO fila 6", "mensaje": "LOGI vende 1,150,000 GTQ; AGRO registra 1,265,000 (+10%). Saldos 287,500 vs 316,250." },
+    { "id": "A-07", "regla": "intercompania", "severidad": "bloqueante", "empresa": ["HERR", "TRAC"], "versiones": ["real_2025"], "ubicacion": "IC-2025-03, HERR fila 7", "mensaje": "HERR vende 310,000 GTQ a TRAC; TRAC no tiene la fila (saldo 77,500 sin contraparte)." }
+  ]
+}
