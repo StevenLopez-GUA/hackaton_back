@@ -20,7 +20,7 @@ function parentesis(d: Decimal): string {
   return `(${d.isNeg() ? "-" : "+"}${miles(d.abs())})`;
 }
 
-function aGtq(monto: Decimal, moneda: string, tipo: "promedio" | "cierre", tasas: Dataset["tasas"]): Decimal | null {
+export function aGtq(monto: Decimal, moneda: string, tipo: "promedio" | "cierre", tasas: Dataset["tasas"]): Decimal | null {
   const tasa = tasas[moneda]?.[tipo];
   if (!tasa || tasa.isZero()) return null;
   return monto.div(tasa);

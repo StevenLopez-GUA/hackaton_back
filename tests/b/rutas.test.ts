@@ -67,3 +67,43 @@ describe("GET /trazabilidad", () => {
     expect((await get("/trazabilidad?metrica=ebit")).status).toBe(400);
   });
 });
+
+describe("endpoints T6", () => {
+  it("GET /impacto-errores", async () => {
+    const { status, body } = await get("/impacto-errores?version=real_2025");
+    expect(status).toBe(200);
+    const a05 = body.items.find((i: any) => i.alertaId === "A-05");
+    expect(a05).toMatchObject({ metrica: "ebit_grupo", valorConError: "-386104.70", valorSinError: "14350000.00", diferencia: "-14736104.70" });
+    expect(a05.indicadoresAfectados).toContainEqual({ nombre: "roic", nivel: "grupo", con: "-0.0269", sin: "0.0963" });
+    expect(body.total).toEqual({ ebitConErrores: "-386104.70", ebitCorregido: "14350000.00" });
+  });
+
+  it("GET /puente (ejemplo y 409)", async () => {
+    const ok = await get("/puente?empresa=HERR&metrica=ebit&desde=real_2025&hasta=ppto_2026");
+    expect(ok.body).toMatchObject({
+      empresa: "HERR", metrica: "ebit", moneda: "MXN",
+      desde: { version: "real_2025", local: "5311000.00", tasa: "2.35" },
+      hasta: { version: "ppto_2026", local: "5571440.00" },
+      base: "2260000.00", operativo: "110825.53", cambiario: "51539.69", nuevo: "2422365.22",
+    });
+    const conflicto = await get("/puente?empresa=CONC&metrica=ebit&desde=real_2025&hasta=ppto_2026");
+    expect(conflicto.status).toBe(409);
+    expect(conflicto.body.error.alerta.id).toBe("A-05");
+    expect((await get("/puente?empresa=HERR&metrica=nopat&desde=real_2025&hasta=ppto_2026")).status).toBe(400);
+  });
+
+  it("POST /escenario", async () => {
+    const res = await fetch(base + "/escenario", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ version: "real_2025", aplicarCorrecciones: "todas", aceptarIC: ["IC-2025-03", "IC-2025-05"], tasas: { MXN: { promedio: "2.35" } } }),
+    });
+    const body: any = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.publicable).toBe(true);
+    expect(body.grupo.ebit.valor).toBe("14350000.00");
+    expect(body.escenario).toEqual({ correccionesAplicadas: ["A-03", "A-04", "A-05", "A-07"], icAceptadas: ["IC-2025-03", "IC-2025-05"], tasasEditadas: ["MXN.promedio"] });
+    const mal = await fetch(base + "/escenario", { method: "POST", headers: { "content-type": "application/json" }, body: "{\"version\":\"x\"}" });
+    expect(mal.status).toBe(400);
+  });
+});
