@@ -74,6 +74,7 @@ Protecciones:
 - Si Groq falla, responde con plantilla: el demo no se cae.
 - Si se agota la cuota por minuto, espera hasta 30 s y reintenta; si se agota la cuota diaria, cambia al modelo de respaldo.
 - Máximo 8 vueltas; en la última se le obliga a responder con lo que tiene.
+- Las comparaciones ROIC vs WACC las hace el código (`roicVsWacc`), porque el modelo de respaldo se equivocaba al comparar.
 - El prompt le prohíbe: inventar cifras, atribuir el impacto total a una sola alerta, recomendar decisiones estratégicas (vender/cerrar) y mezclar cifras con errores y corregidas.
 
 ## Integración con el backend
@@ -88,7 +89,7 @@ Protecciones:
 | Puente | `GET /puente` |
 | WACC | `GET /supuestos` → `parametros.wacc` |
 
-Verificado: EBIT grupo corregido 14,350,000, ROIC 9.63%, 5 bloqueantes + 1 advertencia, CONC/TRAC/LOGI/AGRO destruyen valor, impacto de A-05 (CONC) = −14,736,105. Con datos reales aparecen hallazgos que el mock no tenía: por ejemplo, el EBIT de **FERR cae 22% en el Reforecast** (4.41 M → 3.44 M) y el de TRAC un 51%.
+Verificado (después del merge con main del 21/11, 68 pruebas del back en verde): EBIT grupo corregido 14,350,000, ROIC 9.63%, 5 bloqueantes + 1 advertencia, CONC/TRAC/LOGI/AGRO destruyen valor, impacto de A-05 (CONC) = −14,736,105. Con datos reales aparecen hallazgos que el mock no tenía: por ejemplo, el EBIT de **FERR cae 22% en el Reforecast** (4.41 M → 3.44 M) y el de TRAC un 51%.
 
 Notas para el back:
 - Los IDs de alertas del backend no son los del doc v3 (p. ej. A-02 es intercompañía). El agente no depende de los IDs: los lee de `/validacion`.

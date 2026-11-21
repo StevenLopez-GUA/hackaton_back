@@ -7,6 +7,9 @@ const PORCENTAJES: Metrica[] = ["roic", "roce"];
 
 const pct = (x: number) => `${(x * 100).toFixed(2)}%`;
 const gtq = (x: number) => `GTQ ${Math.round(x).toLocaleString("en-US")}`;
+/** Comparación contra el WACC hecha por código (los modelos pequeños se equivocan al comparar). */
+export const vsWacc = (roic: number | null, wacc = 0.11) =>
+  roic === null ? "sin dato" : roic >= wacc ? `POR ENCIMA del WACC (${pct(wacc)}): crea valor` : `POR DEBAJO del WACC (${pct(wacc)}): destruye valor`;
 export const fmt = (m: Metrica, x: number | null) => (x === null ? "sin dato" : PORCENTAJES.includes(m) ? pct(x) : gtq(x));
 
 function valor(ind: Indicadores | null | undefined, m: Metrica): number | null {
@@ -104,7 +107,7 @@ export async function resumenGrupo(version: Version = "real_2025") {
       advertencias: alertas.filter((a) => a.severidad === "advertencia").length },
     grupoCorregido: g ? {
       ventas: fmt("ventas", valor(g, "ventas")), ebit: fmt("ebit", valor(g, "ebit")),
-      roic: fmt("roic", valor(g, "roic")), roce: fmt("roce", valor(g, "roce")), eva: fmt("eva", valor(g, "eva")),
+      roic: fmt("roic", valor(g, "roic")), roce: fmt("roce", valor(g, "roce")), eva: fmt("eva", valor(g, "eva")), roicVsWacc: vsWacc(valor(g, "roic")),
     } : "sin dato",
     impactoDeTodosLosErroresJuntos: imp ? {
       alcance: "Efecto de TODOS los errores a la vez sobre el grupo. Para el efecto de una alerta sola usa la herramienta impactoPorAlerta.",
@@ -123,7 +126,7 @@ export async function indicadoresEmpresa(empresa: CodigoEmpresa, version: Versio
   if (!ind) return { empresa, version, error: "No hay indicadores por empresa para esa versión (solo existe el detalle por empresa de real_2025; de 2026 solo hay cifras del grupo). No reintentes con otras herramientas." };
   const ms: Metrica[] = ["ventas", "ebit", "nopat", "roic", "roce", "eva"];
   return { empresa, version, tipoDato: "calculado (corregido)",
-    ...Object.fromEntries(ms.map((m) => [m, fmt(m, valor(ind, m))])) };
+    ...Object.fromEntries(ms.map((m) => [m, fmt(m, valor(ind, m))])), roicVsWacc: vsWacc(valor(ind, "roic")) };
 }
 
 /** Calculadora: sumas, restas y variaciones hechas por código, para que el modelo nunca haga aritmética. */
@@ -164,7 +167,8 @@ export async function impactoPorAlerta(version: Version = "real_2025", alertaId?
       efectoEbitIndividual: i.efectoEbitIndividual?.map((e: any) => ({ empresa: e.empresa, monto: gtq(Number(e.monto)) })),
       indicadoresAfectados: i.indicadoresAfectados?.map((x: any) => ({ nombre: x.nombre, nivel: x.nivel,
         con: ["roic", "roce"].includes(x.nombre) ? pct(Number(x.con)) : gtq(Number(x.con)),
-        sin: ["roic", "roce"].includes(x.nombre) ? pct(Number(x.sin)) : gtq(Number(x.sin)) })) })) };
+        sin: ["roic", "roce"].includes(x.nombre) ? pct(Number(x.sin)) : gtq(Number(x.sin)),
+        ...(x.nombre === "roic" ? { conVsWacc: vsWacc(Number(x.con)), sinVsWacc: vsWacc(Number(x.sin)) } : {}) })) })) };
 }
 
 export async function listarAlertas(version?: Version) {
