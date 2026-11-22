@@ -20,7 +20,7 @@ export function cargarDatasetFixture(): Dataset {
     ),
     registros: raw.registros.map((r: any) => ({ ...r, monto: new Decimal(r.monto), tasa: dec(r.tasa), montoGrupo: dec(r.montoGrupo) })),
     intercompania: raw.intercompania.map((r: any) => ({ ...r, monto2025: new Decimal(r.monto2025), saldoCierre: new Decimal(r.saldoCierre) })),
-    totales: raw.totales,
+    totales: raw.totales.map((t: any) => ({ ...t, declarado: new Decimal(t.declarado), sumaLineas: new Decimal(t.sumaLineas) })),
     faltantes: raw.faltantes,
     avisosIngesta: raw.avisosIngesta ?? [],
   };

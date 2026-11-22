@@ -3486,7 +3486,24 @@
       "saldoCierre": "10528000"
     }
   ],
-  "totales": [],
+  "totales": [
+    {
+      "id": "02_agroinsumos_honduras_cierre2025.xlsx:Balance_General:13",
+      "empresa": "AGRO",
+      "etiqueta": "Total activo corriente",
+      "declarado": "48931238",
+      "sumaLineas": "48811238",
+      "lineaIds": [
+        "02_agroinsumos_honduras_cierre2025.xlsx:Balance_General:6",
+        "02_agroinsumos_honduras_cierre2025.xlsx:Balance_General:7",
+        "02_agroinsumos_honduras_cierre2025.xlsx:Balance_General:8",
+        "02_agroinsumos_honduras_cierre2025.xlsx:Balance_General:9",
+        "02_agroinsumos_honduras_cierre2025.xlsx:Balance_General:10",
+        "02_agroinsumos_honduras_cierre2025.xlsx:Balance_General:11",
+        "02_agroinsumos_honduras_cierre2025.xlsx:Balance_General:12"
+      ]
+    }
+  ],
   "faltantes": [],
   "avisosIngesta": []
 }
